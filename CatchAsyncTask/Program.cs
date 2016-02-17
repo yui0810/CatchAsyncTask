@@ -28,11 +28,12 @@ namespace CatchAsyncTask
             try
             {
                 SingleTask singleTask = new SingleTask();
+
                 // Start the task.
-                var task = Task.Factory.StartNew(() => { singleTask.WillThrowException(); });
+                var task = Task.Factory.StartNew(() => { singleTask.WillThrowException().Wait(); });
 
                 // if task.Wait(), will catch in method
-                // if await task, will catch in main
+                // if await task, still catch in method
                 await task;
             }
             catch (AggregateException ex)

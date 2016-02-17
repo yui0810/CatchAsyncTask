@@ -8,7 +8,7 @@ namespace CatchAsyncTask
 {
     public class SingleTask
     {
-        public void WillThrowException()
+        public async Task WillThrowException()
         {
             throw new JustTestException("throw it!");
         }
