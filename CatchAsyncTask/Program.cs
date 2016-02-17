@@ -13,19 +13,32 @@ namespace CatchAsyncTask
         {
             try
             {
+                MethodCall().Wait();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(string.Format("in Main, {0}", ex.InnerException.Message));
+            }
+
+            Console.ReadKey();
+        }
+
+        static async Task MethodCall()
+        {
+            try
+            {
                 SingleTask singleTask = new SingleTask();
                 // Start the task.
                 var task = Task.Factory.StartNew(() => { singleTask.WillThrowException(); });
 
-                // Wait the task.
-                task.Wait();
+                // if task.Wait(), will catch in method
+                // if await task, will catch in main
+                await task;
             }
             catch (AggregateException ex)
             {
-                Console.WriteLine(ex.InnerException.Message);
+                Console.WriteLine(string.Format("in Method, {0}", ex.InnerException.Message));
             }
-
-            Console.ReadKey();
         }
     }
 }
