@@ -23,33 +23,36 @@ namespace CatchAsyncTask
             Console.ReadKey();
         }
 
-        static async Task MethodCall()
+        private static async Task MethodCall()
         {
-
             SingleTask singleTask = new SingleTask();
-
-            // Start the task.
-            var task = singleTask.WillThrowException();
 
             try
             {
-                // if task.Wait(), will catch in method
-                // if await task, will catch in main
-                task.Wait();
+                Task[] tasks = new Task[2];
+                for (int i = 0; i < 2; i++)
+                {
+
+                    var newTask = singleTask.WillThrowException()
+                        .ContinueWith(task =>
+                        {
+                            if (task.IsFaulted)
+                            {
+                                var flattened = task.Exception.Flatten();
+
+                                // Catch exception
+                                flattened.Handle(ex => { Console.WriteLine("task Error:" + ex.Message); return true; });
+                            }
+                        });
+
+                    tasks[i] = newTask;
+                }
+
+                await Task.WhenAll(tasks);
             }
             catch (AggregateException ex)
             {
                 Console.WriteLine(string.Format("in Method, {0}", ex.InnerException.Message));
-            }
-
-            Console.WriteLine("Task IsCanceled: " + task.IsCanceled);
-            Console.WriteLine("Task IsFaulted:  " + task.IsFaulted);
-            if (task.Exception != null)
-            {
-                Console.WriteLine("Task Exception Message: "
-                    + task.Exception.Message);
-                Console.WriteLine("Task Inner Exception Message: "
-                    + task.Exception.InnerException.Message);
             }
         }
     }
